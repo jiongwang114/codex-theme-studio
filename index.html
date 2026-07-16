@@ -27,7 +27,7 @@
       <main>
         <header class="topbar">
           <div><p class="eyebrow">CODEX / 主题工作台</p><h1>主题库</h1></div>
-          <div class="header-actions"><button class="icon-button" type="button" title="切换密度">↗</button><button class="primary" id="newTheme" type="button">+ 从图片创建</button></div>
+          <div class="header-actions"><button class="icon-button" type="button" title="切换密度">↗</button><button class="ghost" id="applyHeige" type="button">应用 HeiGe UI</button><button class="primary" id="newTheme" type="button">+ 从图片创建</button></div>
         </header>
 
         <section class="active-strip">
@@ -68,6 +68,14 @@
         <h2>让 Codex 以主题模式重新打开？</h2>
         <p>当前 Codex 未开放本机主题接口。继续将先正常关闭当前 Codex，再以本机 CDP 模式重新启动并应用主题。请先保存正在运行的任务。</p>
         <div><button class="ghost" value="cancel" type="submit">暂不处理</button><button class="primary" id="restartApply" value="default" type="button">重启并应用</button></div>
+      </form>
+    </dialog>
+    <dialog id="heigeDialog">
+      <form method="dialog" class="restart-card">
+        <p class="eyebrow">HEIGE SKIN STUDIO</p>
+        <h2>应用完整的 HeiGe 界面皮肤？</h2>
+        <p>这会立即关闭当前 Codex 窗口，并以本机 CDP 模式重新打开。重启后顶部将出现 🎨 菜单，可即时切换主题和导入本地图片。</p>
+        <div><button class="ghost" value="cancel" type="submit">取消</button><button class="primary" id="confirmHeige" value="default" type="button">关闭并应用</button></div>
       </form>
     </dialog>
     <div class="toast" id="toast"></div>

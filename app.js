@@ -4,6 +4,7 @@ const preview = document.querySelector('#codexPreview');
 const toast = document.querySelector('#toast');
 const dialog = document.querySelector('#creatorDialog');
 const restartDialog = document.querySelector('#restartDialog');
+const heigeDialog = document.querySelector('#heigeDialog');
 const imageInput = document.querySelector('#imageInput');
 const saveTheme = document.querySelector('#saveTheme');
 const themeName = document.querySelector('#themeName');
@@ -27,6 +28,8 @@ document.querySelector('#panelApply').onclick=()=>applyTheme(activeId,true);
 document.querySelector('#reapplyTheme').onclick=()=>applyTheme(activeId,true);
 document.querySelector('#restoreTheme').onclick=async()=>{ try { const response=await fetch('/api/restore',{method:'POST'}); const data=await response.json(); if(!response.ok) throw new Error(data.error); activeId='aurora'; await applyTheme('aurora'); notify('Codex 已恢复为原生外观'); } catch(error) { notify(error.message || '无法恢复原生外观'); } };
 document.querySelector('#restartApply').onclick=async()=>{ if (!pendingRestartTheme) return; restartDialog.close(); await applyTheme(pendingRestartTheme,true,true); pendingRestartTheme=null; };
+document.querySelector('#applyHeige').onclick=()=>heigeDialog.showModal();
+document.querySelector('#confirmHeige').onclick=async()=>{ document.querySelector('#confirmHeige').disabled=true; document.querySelector('#confirmHeige').textContent='正在重启 Codex...'; try { await fetch('/api/heige/apply',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({theme:'miku-488137'})}); } catch {} finally { heigeDialog.close(); } };
 function paletteFromImage(file){const reader=new FileReader();reader.onload=e=>{uploadedImage=e.target.result;const img=new Image();img.onload=()=>{const c=document.createElement('canvas'),ctx=c.getContext('2d');c.width=40;c.height=40;ctx.drawImage(img,0,0,40,40);const data=ctx.getImageData(0,0,40,40).data;let r=0,g=0,b=0,n=0;for(let i=0;i<data.length;i+=16){r+=data[i];g+=data[i+1];b+=data[i+2];n++}const base=[r/n,g/n,b/n].map(v=>Math.round(v));const hex=(a)=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');const colors=[hex(base.map(v=>v*.28)),hex(base.map(v=>v*.68+36)),hex([base[1]+20,base[2]+5,base[0]+40]),hex(base.map(v=>255-v*.28))];document.querySelector('#generatedPalette').innerHTML=colors.map(x=>`<span style="background:${x}"></span>`).join('')+'<small>已从图片提取配色</small>';saveTheme.disabled=false;saveTheme.dataset.colors=JSON.stringify(colors)};img.src=uploadedImage};reader.readAsDataURL(file)}
 imageInput.onchange=e=>e.target.files[0]&&paletteFromImage(e.target.files[0]);
 const dropZone=document.querySelector('#dropZone');['dragenter','dragover'].forEach(evt=>dropZone.addEventListener(evt,e=>{e.preventDefault();dropZone.classList.add('dragging')}));['dragleave','drop'].forEach(evt=>dropZone.addEventListener(evt,e=>{e.preventDefault();dropZone.classList.remove('dragging')}));dropZone.addEventListener('drop',e=>e.dataTransfer.files[0]&&paletteFromImage(e.dataTransfer.files[0]));

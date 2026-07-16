@@ -1,0 +1,3 @@
+[submodule "vendor/heige-codex-skin-studio"]
+	path = vendor/heige-codex-skin-studio
+	url = https://github.com/HeiGeAi/heige-codex-skin-studio.git
