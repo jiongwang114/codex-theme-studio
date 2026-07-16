@@ -5,23 +5,14 @@
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
-$heigeRoot = Join-Path $root "vendor\heige-codex-skin-studio"
-$common = Join-Path $heigeRoot "scripts\windows\lib\common.ps1"
-$apply = Join-Path $heigeRoot "scripts\windows\apply.ps1"
+$node = (Get-Command node -ErrorAction Stop).Source
+$core = Join-Path $root "node_modules\@codedrobe\core\bin\codedrobe.mjs"
+$heigeCli = Join-Path $root "vendor\heige-codex-skin-studio\src\cli.mjs"
 
-. $common
-$app = Get-CodexApp
-$running = Get-RunningCodex -AppPath $app
-if ($running) {
-  $running | Stop-Process -Force
-  for ($i = 0; $i -lt 40; $i++) {
-    if (-not (Get-RunningCodex -AppPath $app)) { break }
-    Start-Sleep -Milliseconds 250
-  }
-}
+# CodeDrobe reliably relaunches the Store edition with a loopback-only CDP port.
+& $node $core launch --app codex --port 9335 --restart-existing
+if ($LASTEXITCODE -ne 0) { throw "CodeDrobe could not restart Codex with CDP." }
 
-if (Get-RunningCodex -AppPath $app) {
-  throw "Codex processes did not exit; HeiGe UI was not applied."
-}
-
-& $apply -Theme $Theme
+# HeiGe owns the visual layer and the in-app palette menu.
+& $node $heigeCli apply --theme $Theme --port 9335
+if ($LASTEXITCODE -ne 0) { throw "HeiGe UI injection failed." }
