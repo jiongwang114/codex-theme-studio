@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
-import { mkdir, readFile, readdir, writeFile, stat } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile, appendFile, stat } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
 import { extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +9,7 @@ const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const themeRoot = join(root, 'data', 'themes');
 const coreCli = join(root, 'node_modules', '@codedrobe', 'core', 'bin', 'codedrobe.mjs');
 const heigeApplyScript = join(root, 'scripts', 'apply-heige-ui.ps1');
+const heigeLog = join(root, 'data', 'heige-apply.log');
 const heigeThemeIds = new Set(['miku-488137', 'genshin-night', 'genshin-dawn', 'wuthering-echo', 'wuthering-tide', 'naruto-hokage', 'naruto-sasuke', 'deepspace-dawn', 'deepspace-star', 'dalao-dianyan']);
 const port = Number(process.env.PORT || 4173);
 const mime = { '.css':'text/css; charset=utf-8', '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.svg':'image/svg+xml' };
@@ -26,8 +27,8 @@ function runHeiGe(theme) {
   return new Promise((resolveRun) => {
     const child = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', heigeApplyScript, '-Theme', theme], { windowsHide: true });
     let output = ''; child.stdout.on('data', d => output += d); child.stderr.on('data', d => output += d);
-    child.on('error', error => resolveRun({ ok:false, output:error.message }));
-    child.on('close', code => resolveRun({ ok:code === 0, output:output.trim(), code }));
+    child.on('error', async error => { await appendFile(heigeLog, `${new Date().toISOString()} ERROR ${error.message}\n`); resolveRun({ ok:false, output:error.message }); });
+    child.on('close', async code => { await appendFile(heigeLog, `${new Date().toISOString()} EXIT ${code}\n${output.trim()}\n`); resolveRun({ ok:code === 0, output:output.trim(), code }); });
   });
 }
 function safeId(value) { return String(value || '').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 48) || `theme-${Date.now()}`; }
