@@ -7,13 +7,14 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const themeRoot = join(root, 'data', 'themes');
+const coreCli = join(root, 'node_modules', '@codedrobe', 'core', 'bin', 'codedrobe.mjs');
 const port = Number(process.env.PORT || 4173);
 const mime = { '.css':'text/css; charset=utf-8', '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.svg':'image/svg+xml' };
 
 function send(res, status, body, type = 'application/json; charset=utf-8') { res.writeHead(status, { 'content-type': type, 'cache-control':'no-store' }); res.end(typeof body === 'string' ? body : JSON.stringify(body)); }
 function runCore(args) {
   return new Promise((resolveRun) => {
-    const child = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['--yes', '@codedrobe/core@latest', ...args], { windowsHide: true });
+    const child = spawn(process.execPath, [coreCli, ...args], { windowsHide: true });
     let output = ''; child.stdout.on('data', d => output += d); child.stderr.on('data', d => output += d);
     child.on('error', error => resolveRun({ ok:false, output:error.message }));
     child.on('close', code => resolveRun({ ok:code === 0, output:output.trim(), code }));

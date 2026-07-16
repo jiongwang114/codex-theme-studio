@@ -18,11 +18,7 @@
 npm.cmd start
 ```
 
-然后打开 `http://localhost:4173`。首次点击“应用此主题”时，运行时会通过 `npx` 下载 `@codedrobe/core`；也可提前执行：
-
-```powershell
-npm.cmd install --global @codedrobe/core
-```
+然后打开 `http://localhost:4173`。`@codedrobe/core` 已作为项目本地依赖安装，无需全局安装或额外运行 `npx`。
 
 ## 接入 CodeDrobe
 
